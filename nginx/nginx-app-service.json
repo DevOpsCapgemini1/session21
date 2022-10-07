@@ -1,0 +1,78 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.11.1.770",
+      "templateHash": "6279351140956444537"
+    }
+  },
+  "parameters": {
+    "aspName": {
+      "type": "string",
+      "defaultValue": "mbidzins-nginx-asp"
+    },
+    "webAppName": {
+      "type": "string",
+      "defaultValue": "mbidzins-nginx-app"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "pricingTier": {
+      "type": "string",
+      "defaultValue": "S1"
+    },
+    "numberOfWorkers": {
+      "type": "int",
+      "defaultValue": 1
+    },
+    "dockerImage": {
+      "type": "string",
+      "defaultValue": "nginx:latest"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2020-12-01",
+      "name": "[parameters('aspName')]",
+      "location": "[parameters('location')]",
+      "kind": "linux",
+      "sku": {
+        "name": "[parameters('pricingTier')]"
+      },
+      "tags": {
+        "displayName": "[parameters('aspName')]"
+      },
+      "properties": {
+        "targetWorkerCount": "[parameters('numberOfWorkers')]",
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2020-12-01",
+      "name": "[parameters('webAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "app,linux,container",
+      "tags": {
+        "[format('hidden-related:{0}/providers/Microsoft.Web/serverfarms/{1}', resourceGroup().id, parameters('aspName'))]": "Resource",
+        "displayName": "[parameters('webAppName')]"
+      },
+      "properties": {
+        "httpsOnly": false,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('aspName'))]",
+        "siteConfig": {
+          "numberOfWorkers": "[parameters('numberOfWorkers')]",
+          "linuxFxVersion": "[format('DOCKER|{0}', parameters('dockerImage'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('aspName'))]"
+      ]
+    }
+  ]
+}

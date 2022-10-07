@@ -1,0 +1,2 @@
+#!/bin/bash
+az webapp config storage-account add --resource-group "tfstate" --name "mbidzins-nginx-app" --custom-id "defaultWebsite" --storage-type "AzureFiles" --share-name "nginxfile" --account-name "storagefornginx" --access-key "CM8wZcw/47MPbYEOGo3okNysBq58wcEVBGHkgJFUi4U1SKJ2O5oXGSPk4VcSuo3lxWXmEuzckAhq+ASt8W3Nzg==" --mount-path "/usr/share/nginx/html" 
